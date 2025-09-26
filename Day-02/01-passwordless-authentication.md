@@ -4,18 +4,33 @@
 
 ### Using Public Key
 
-```
-ssh-copy-id -f "-o IdentityFile <PATH TO PEM FILE>" ubuntu@<INSTANCE-PUBLIC-IP>
-```
+## Convert .pem private key to a public key
+ssh-keygen -y -f ~/ayush077.pem > ~/ayush.pub
 
-- ssh-copy-id: This is the command used to copy your public key to a remote machine.
-- -f: This flag forces the copying of keys, which can be useful if you have keys already set up and want to overwrite them.
-- "-o IdentityFile <PATH TO PEM FILE>": This option specifies the identity file (private key) to use for the connection. The -o flag passes this option to the underlying ssh command.
-- ubuntu@<INSTANCE-IP>: This is the username (ubuntu) and the IP address of the remote server you want to access.
+ssh-keygen -y extracts the public key from your AWS private key.
+Output is saved as ayush.pub.
+Keep .pem safe; share only .pub.
 
-### Using Password 
+## Copy the public key to EC2 (authorized_keys)
+ssh-copy-id -f -i ~/ayush.pub -o IdentityFile=~/ayush077.pem ubuntu@<EC2-PUBLIC-IP>
 
-- Go to the file `/etc/ssh/sshd_config.d/60-cloudimg-settings.conf`
-- Update `PasswordAuthentication yes`
-- Restart SSH -> `sudo systemctl restart ssh`
+-i ~/ayush.pub → key to install.
+-o IdentityFile=~/ayush077.pem → tells SSH to use the AWS PEM for login.
+-f → forces installation even if no matching private key file exists locally.
+
+## Test passwordless login
+ssh ubuntu@<EC2-PUBLIC-IP>
+
+
+Notes
+
+Always chmod 400 your .pem before use:
+chmod 400 ~/ayush077.pem
+
+
+If your .pem is on Windows, copy it to WSL/Linux ~ before using:
+cp /mnt/c/Users/<username>/Downloads/ayush077.pem ~/
+chmod 400 ~/ayush077.pem
+
+You only need the .pem once; after setup, you can log in with your new SSH key pair.
 
